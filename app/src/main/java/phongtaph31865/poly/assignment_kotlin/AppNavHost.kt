@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import phongtaph31865.poly.assignment_kotlin.models.User
+import phongtaph31865.poly.assignment_kotlin.viewmodels.Favorite_Viewmodel
+import phongtaph31865.poly.assignment_kotlin.viewmodels.Product_Viewmodel
+import phongtaph31865.poly.assignment_kotlin.viewmodels.User_Viewmodel
 
 
 enum class ROUTE_NAME {
@@ -32,17 +36,19 @@ fun AppNavHost(
 
     NavHost(navController = navController, startDestination = ROUTE_NAME.welcome.name) {
         composable(ROUTE_NAME.welcome.name) { WelComeScreen(navController) }
-        composable(ROUTE_NAME.login.name) { LoginScreen(navController) }
-        composable(ROUTE_NAME.home.name) { FurnitureApp(navController) }
-        composable(ROUTE_NAME.signup.name) { RegisterScreen(navController) }
+        composable(ROUTE_NAME.login.name) { LoginScreen(navController, User_Viewmodel()) }
+        composable(ROUTE_NAME.home.name) { FurnitureApp(navController, Favorite_Viewmodel()) }
+        composable(ROUTE_NAME.signup.name) { RegisterScreen(navController, User_Viewmodel()) }
         composable("${ROUTE_NAME.detail.name}/{prId}/{prName}/{prImg}/{prPrice}/{description}/{rate}") {
             DetailsProduct(
                 navController,
+                viewmodel = Product_Viewmodel(),
+                id = it.arguments?.getString("prId").toString(),
                 name = it.arguments?.getString("prName").toString(),
                 image = it.arguments?.getString("prImg").toString(),
                 rate = it.arguments?.getString("rate").toString(),
                 price = it.arguments?.getString("prPrice").toString(),
-                description = it.arguments?.getString("description").toString(),
+                description = it.arguments?.getString("description").toString()
             )
         }
         composable(ROUTE_NAME.cart.name) { SmallTopAppCart(navController) }

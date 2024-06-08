@@ -5,8 +5,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import phongtaph31865.poly.assignment_kotlin.api_service.Api_service
+import phongtaph31865.poly.assignment_kotlin.models.Cart
+import phongtaph31865.poly.assignment_kotlin.models.Favorite
 import phongtaph31865.poly.assignment_kotlin.models.Product
 
 class Product_Viewmodel: ViewModel() {
@@ -20,6 +23,46 @@ class Product_Viewmodel: ViewModel() {
                 Log.e("list_product", "success")
             } catch (e: Exception) {
                 Log.e("list_product", e.message.toString())
+            }
+        }
+    }
+
+    private val _isAddtoCart = mutableStateOf(false)
+    val isAddtoCart: MutableState<Boolean> = _isAddtoCart
+    fun add_to_cart(product: Product) {
+        _isAddtoCart.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val addToCartResponse = apiService.POST_CART(product) // Example API call
+                if (addToCartResponse.isSuccessful) {
+                    // Handle successful addition (e.g., update UI, confirmation message)
+                    Log.d("add_to_cart", "Product added to cart successfully!")
+                } else {
+                    // Handle error (e.g., display error message to user)
+                    Log.e("add_to_cart", "Error adding product to cart: ${addToCartResponse.code()}")
+                }
+            }catch (e: Exception) {
+                Log.e("add_to_cart", e.message.toString())
+            }finally {
+                _isAddtoCart.value = false // Set adding state to false
+            }
+        }
+    }
+    private val _isAddtoFavorite = mutableStateOf(false)
+    fun add_to_favorite(product: Product) {
+        _isAddtoFavorite.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val addToFavoriteResponse = apiService.POST_FAVORITE(product)
+                if (addToFavoriteResponse.isSuccessful){
+                    Log.d("add_to_favorite", "Product added to favorite successfully!")
+                }else{
+                    Log.e("add_to_favorite", "Error adding product to favorite: ${addToFavoriteResponse.code()}")
+                }
+            }catch (e: Exception) {
+                Log.e("add_to_favorite", e.message.toString())
+            }finally {
+                _isAddtoFavorite.value = false
             }
         }
     }

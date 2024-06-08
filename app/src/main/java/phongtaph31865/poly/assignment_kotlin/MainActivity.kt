@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import phongtaph31865.poly.assignment_kotlin.models.User
 import phongtaph31865.poly.assignment_kotlin.ui.theme.Assignment_kotlinTheme
+import phongtaph31865.poly.assignment_kotlin.viewmodels.User_Viewmodel
 
 
 class MainActivity : ComponentActivity() {
@@ -18,11 +20,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Assignment_kotlinTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     MyApp()
                 }
             }

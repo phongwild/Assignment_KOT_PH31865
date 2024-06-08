@@ -1,5 +1,6 @@
 package phongtaph31865.poly.assignment_kotlin
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,12 +18,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -34,10 +40,12 @@ import androidx.compose.ui.zIndex
 import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import phongtaph31865.poly.assignment_kotlin.models.Product
+import phongtaph31865.poly.assignment_kotlin.viewmodels.Product_Viewmodel
 
 @Composable
-fun DetailsProduct(navController: NavController, name: String, price: String, image: String, rate: String, description: String) {
-
+fun DetailsProduct(navController: NavController, name: String, price: String, image: String, rate: String, description: String, id: String ,viewmodel: Product_Viewmodel) {
+    val context = LocalContext.current.applicationContext
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,11 +80,16 @@ fun DetailsProduct(navController: NavController, name: String, price: String, im
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val quantity by remember { mutableStateOf(1) }
                     Box(
                         modifier = Modifier
                             .size(30.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(color = Color("#E0E0E0".toColorInt())),
+                            .background(color = Color("#E0E0E0".toColorInt()))
+                            .clickable {
+                                quantity.plus(1)
+                                Log.e("quantity", quantity.toString())
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -86,7 +99,7 @@ fun DetailsProduct(navController: NavController, name: String, price: String, im
                         )
                     }
                     Text(
-                        text = "01",
+                        text = "$quantity",
                         fontSize = 18.sp,
                         fontWeight = FontWeight(700),
                         fontFamily = FontFamily(
@@ -156,7 +169,21 @@ fun DetailsProduct(navController: NavController, name: String, price: String, im
                     modifier = Modifier
                         .size(60.dp)
                         .shadow(elevation = 2.dp, RoundedCornerShape(8.dp))
-                        .background(color = Color("#F5F5F5".toColorInt())),
+                        .background(color = Color("#F5F5F5".toColorInt()))
+                        .clickable(onClick = {
+                            viewmodel.add_to_favorite(
+                                Product(
+                                    prName = name,
+                                    prPrice = price,
+                                    prImg = image,
+                                    rate = rate,
+                                    description = description,
+                                    quantity = 1,
+                                    prId = id
+                                )
+                            )
+                            Toast.makeText(context, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show()
+                        }),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -174,6 +201,16 @@ fun DetailsProduct(navController: NavController, name: String, price: String, im
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFF242424))
                         .clickable(onClick = {
+                            viewmodel.add_to_cart(product = Product(
+                                prName = name,
+                                prPrice = price,
+                                prImg = image,
+                                rate = rate,
+                                description = description,
+                                quantity = 1,
+                                prId = id
+                            ))
+                            Toast.makeText(context, "Thêm vào giỏ hàng thành công", Toast.LENGTH_SHORT).show()
                             navController.navigate("cart")
                         })
                 ) {
@@ -208,9 +245,7 @@ fun Custom(navController: NavController, image: String) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Box {
-
-                }
+                Box {}
                 AsyncImage(
                     model = image,
                     contentDescription = null,
@@ -229,7 +264,6 @@ fun Custom(navController: NavController, image: String) {
         Box(
             modifier = Modifier
                 .width(130.dp)
-
                 .fillMaxHeight()
         ) {
             Column (modifier = Modifier.fillMaxSize(),

@@ -74,4 +74,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.11.0")
     implementation ("com.google.code.gson:gson:2.11.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
+    //refresh
+    val lifecycle_version = "2.8.1"
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
 }

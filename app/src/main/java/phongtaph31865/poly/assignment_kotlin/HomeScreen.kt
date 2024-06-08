@@ -2,6 +2,7 @@ package phongtaph31865.poly.assignment_kotlin
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -81,9 +82,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import phongtaph31865.poly.assignment_kotlin.models.Cart
 import phongtaph31865.poly.assignment_kotlin.models.Category
 import phongtaph31865.poly.assignment_kotlin.models.Product
 import phongtaph31865.poly.assignment_kotlin.viewmodels.Category_Viewmodel
+import phongtaph31865.poly.assignment_kotlin.viewmodels.Favorite_Viewmodel
 import phongtaph31865.poly.assignment_kotlin.viewmodels.Product_Viewmodel
 
 enum class ROUTE_HOME_SCREEN {
@@ -95,7 +98,7 @@ enum class ROUTE_HOME_SCREEN {
 
 
 @Composable
-fun FurnitureApp(navHostController : NavController) {
+fun FurnitureApp(navHostController : NavController, viewModel: Favorite_Viewmodel) {
     val navController = rememberNavController()
     val items = listOf(
         BottomNavigationItem(ROUTE_HOME_SCREEN.Home.name, Icons.Default.Home, Icons.Outlined.Home),
@@ -128,7 +131,7 @@ fun FurnitureApp(navHostController : NavController) {
                 )
             }
         ) { innerPadding ->
-            NavigationGraph(navHostController = navHostController,navController = navController, innerPadding = innerPadding)
+            NavigationGraph(navHostController = navHostController,navController = navController, innerPadding = innerPadding, viewModel = viewModel)
         }
     }
 }
@@ -244,12 +247,7 @@ fun ListCategory(viewmodel: Category_Viewmodel) {
             CategoryItem(item = category[item])
         }
     }
-    DisposableEffect(Unit) {
-        viewmodel.get_category()
-        onDispose {
-            viewmodel.categories.value = emptyList()
-        }
-    }
+    viewmodel.get_category()
 }
 @Composable
 fun CategoryItem(item: Category) {
@@ -286,7 +284,6 @@ fun CategoryItem(item: Category) {
 }
 @Composable
 fun HomeScreen(navController: NavController) {
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier.padding(
             top = 10.dp,
@@ -307,14 +304,14 @@ fun HomeScreen(navController: NavController) {
 
 
 @Composable
-fun NavigationGraph(navHostController : NavController, navController: NavHostController, innerPadding: PaddingValues) {
+fun NavigationGraph(navHostController : NavController, navController: NavHostController, innerPadding: PaddingValues, viewModel: Favorite_Viewmodel) {
     NavHost(
         navController,
         startDestination = ROUTE_HOME_SCREEN.Home.name,
         modifier = Modifier.padding(innerPadding)
     ) {
         composable(ROUTE_HOME_SCREEN.Home.name) { HomeScreen(navHostController) }
-        composable(ROUTE_HOME_SCREEN.Favorite.name) { FavoriteScreen(innerPadding) }
+        composable(ROUTE_HOME_SCREEN.Favorite.name) { FavoriteScreen(innerPadding, viewModel) }
         composable(ROUTE_HOME_SCREEN.Notification.name) { NotificationScreen(innerPadding) }
         composable(ROUTE_HOME_SCREEN.Profile.name) { AccountScreenControl(innerPadding , navHostController) }
     }
@@ -406,142 +403,21 @@ fun ProductItem(navController: NavController, item: Product) {
 fun ProductList(viewModel: Product_Viewmodel, navController: NavController) {
     val product = viewModel.products.value
     val gridState = rememberLazyStaggeredGridState()
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(2),
-        state = gridState,
-        verticalItemSpacing = 10.dp,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.padding(10.dp)
+    Box(
+        modifier = Modifier
     ) {
-        items(product.size) { item ->
-            ProductItem(item = product[item], navController = navController)
-        }
-    }
-    DisposableEffect(Unit) {
-        viewModel.get_products()
-        onDispose {
-            viewModel.products.value = emptyList()
-        }
-    }
-}
-@Composable
-fun ListFavorite() {
-
-}
-@Composable
-fun FavoriteItem(icon : String , name : String , price : Double){
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .height(110.dp)
-        .background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically){
-        AsyncImage(model = icon, contentDescription = null, modifier = Modifier
-            .width(110.dp)
-            .height(120.dp), contentScale = ContentScale.FillBounds)
-
-        Column (modifier = Modifier
-            .width(200.dp)
-            .padding(start = 10.dp)
-            .fillMaxHeight()) {
-            Text(text = name, fontSize = 15.sp, fontWeight = FontWeight(600), color = colorResource(
-                id = R.color.gray
-            ), fontFamily = FontFamily(
-                Font(R.font.nunitosans_7pt_condensed_light)
-            ))
-            Spacer(modifier = Modifier.height(3.dp))
-            Text(text = "\$ " + price, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily(
-                Font(R.font.nunitosans_7pt_condensed_bold)
-            ))
-        }
-        Column (modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally){
-            Icon(painter = painterResource(id = R.drawable.delete), contentDescription = null, modifier = Modifier.size(24.dp))
-
-            Row {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(painter = painterResource(id = R.drawable.bag), contentDescription = null, modifier = Modifier.size(24.dp))
-                }
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            state = gridState,
+            verticalItemSpacing = 10.dp,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(10.dp)
+        ) {
+            items(product.size) { item ->
+                ProductItem(item = product[item], navController = navController)
             }
         }
     }
-}
-@Composable
-fun CartItem(icon : Int , name : String , price : Double){
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .height(110.dp)
-        .background(Color.White),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically){
-        Image(painter = painterResource(id = icon), contentDescription = null, modifier = Modifier
-            .width(110.dp)
-            .height(120.dp), contentScale = ContentScale.FillBounds)
 
-        Column (modifier = Modifier
-            .width(200.dp)
-            .padding(start = 10.dp)
-            .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween) {
-            Column {
-                Text(text = name, fontSize = 15.sp, fontWeight = FontWeight(600), color = colorResource(
-                    id = R.color.gray
-                ), fontFamily = FontFamily(
-                    Font(R.font.nunitosans_7pt_condensed_light)
-                ))
-                Spacer(modifier = Modifier.height(3.dp))
-                Text(text = "\$ "+price, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily(
-                    Font(R.font.nunitosans_7pt_condensed_bold)
-                ))
-            }
-            Row(
-                modifier = Modifier.width(113.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(color = Color("#E0E0E0".toColorInt())),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.add),
-                        contentDescription = null,
-                        modifier = Modifier.size(13.dp)
-                    )
-                }
-                Text(
-                    text = "01",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight(700),
-                    fontFamily = FontFamily(
-                        Font(R.font.nunitosans_7pt_condensed_bold)
-                    )
-                )
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(color = Color("#E0E0E0".toColorInt())),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.apart),
-                        contentDescription = null,
-                        modifier = Modifier.size(13.dp)
-                    )
-                }
-            }
-
-
-        }
-        Column (modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally){
-            Icon(painter = painterResource(id = R.drawable.delete), contentDescription = null, modifier = Modifier.size(24.dp))
-
-            Row {
-
-            }
-        }
-    }
+    viewModel.get_products()
 }
